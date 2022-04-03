@@ -1,0 +1,7 @@
+---
+username: user1
+password: "{{ vault_password }}"
+host_ssh: /home/qshar/.ssh/key_auth_github
+cloud_sa_user: admin 
+host_alias: ansible
+source_key: vault_id_rsa_ansible_2
