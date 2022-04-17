@@ -1,0 +1,6 @@
+---
+# vars file for webserver
+document_root: /opt/nginx/ansible
+hostname: web-php
+php_ver: 7.4
+domain: webserver # domain name for config file

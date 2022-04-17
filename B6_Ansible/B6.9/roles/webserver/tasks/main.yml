@@ -1,0 +1,58 @@
+---
+# tasks file for webserver
+- name: Install Nginx
+  apt:
+    #update_cache: yes
+    pkg:
+      - nginx
+    state: latest
+  register: nginxinstalled # register statement for successfull installing for Nginx
+
+- debug:
+    var: nginxinstalled
+
+- name: Start up the Nginx service
+  when: nginxinstalled.stdout.find('is not installed') == -1 # check statement for Nginx from ansible_facts
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Install PHP-FPM
+  apt:
+    pkg:
+      - php{{php_ver}}-fpm
+    state: latest
+  register: phpinstalled # register statement for successfull installing for PHP-FPM
+
+- name: Ensure what we use UNUX socker for listening
+  when: phpinstalled.stdout.find('is not installed') == -1
+  lineinfile:
+    path: /etc/php/{{php_ver}}/fpm/pool.d/www.conf
+    regexp: "%listen =%"
+    line: "listen = /run/php/php{{php_ver}}-fpm.sock"
+
+- name: Change listenmode for PHP
+  lineinfile:
+    path: /etc/php/{{php_ver}}/fpm/pool.d/www.conf
+    regexp: "%listen.mode =%"
+    line: "listen.mode = 0660"
+
+- name: Creates directory for DocumentRoot
+  file:
+    path: "{{document_root}}"
+    state: directory
+
+- name: Creating an index.php file with content
+  copy:
+    dest: "{{document_root}}/index.php"
+    content: |
+      <?php phpinfo();?>
+
+- name: Add Nginx cofig
+  template: src={{ domain }}.config dest=/etc/nginx/conf.d/{{ domain }}.conf #owner=nginx group=nginx
+
+- name: Create Web Root
+  file: path={{ document_root }}  mode=775 state=directory #owner=nginx group=nginx
+  notify:
+    - Reload nginx

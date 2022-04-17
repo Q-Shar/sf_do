@@ -1,0 +1,31 @@
+---
+# tasks file for dnsmasq
+- name: Install dnsmasq
+  become: true
+  apt:
+    pkg:
+    - dnsmasq
+    state: present
+
+- name: Disable the default listener for DNS
+  service:
+    name: systemd-resolved
+    enabled: false
+    state: stopped
+    masked: yes
+
+- name: Start up the dnsmasq service
+  service:
+    name: dnsmasq
+    state: started
+    enabled: true
+
+- name: Setup iptables rule (Allow new incoming UDP packets on TCP port 53 (DNS))
+  iptables:
+    chain: INPUT
+    protocol: udp
+    destination_port: 53
+    ctstate: NEW
+    #syn: match
+    jump: ACCEPT
+  become: true
