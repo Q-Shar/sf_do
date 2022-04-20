@@ -1,0 +1,103 @@
+---
+# tasks file for docker
+# - name: apt update
+#   apt:
+#     update_cache: yes
+#   tags: init
+
+- name: apt update
+  apt:
+    update_cache: yes
+  when: is_ubuntu
+
+- name: Install prerequisites for Docker repository
+  apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg2
+    - software-properties-common
+    - python3-docker # issue: Failed to import the required Python library (Docker SDK for Python: docker above 5.0.0 (Python >= 3.6)
+  when: is_ubuntu
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  when: is_ubuntu
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+    state: present
+    update_cache: yes
+  when: is_ubuntu
+
+
+- name: Install yum utils
+  yum:
+    name: yum-utils
+    state: latest
+  when: is_centos
+
+- name: Install device-mapper-persistent-data
+  yum:
+    name: device-mapper-persistent-data
+    state: latest
+  when: is_centos
+
+- name: Install lvm2
+  yum:
+    name: lvm2
+    state: latest
+  when: is_centos
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+  when: is_centos
+
+- name: Install certain python modules for docker
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+  with_items:
+  - { name: docker-py, version: 1.10.6 }
+  when: is_centos
+
+- name: install docker and it's dependencies
+  apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    state: present
+  when: is_ubuntu
+
+- name: install docker and it's dependencies
+  package:
+    name: docker-ce
+    state: latest
+  when: is_centos
+
+- name: start and enable docker daemon
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pull default Docker image
+  docker_image:
+    name: "{{ default_container_image }}"
+    source: pull
+
+- name: Create default container
+  docker_container:
+    name: "{{ default_container_name }}_{{ item }}"
+    image: "{{ default_container_image }}"
+    command: "{{ default_container_command }}"
+    state: started
+  with_sequence: count=1

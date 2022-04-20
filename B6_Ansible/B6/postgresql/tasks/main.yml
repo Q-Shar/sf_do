@@ -1,0 +1,60 @@
+---
+# tasks file for postgresql
+- name: Add postgresql apt repository key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add postgresql apt repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    update_cache: yes
+
+- name: Install postgresql dependencies
+  apt:
+    name: acl
+    state: present
+
+- name: Install postgresql
+  apt:
+    name: "postgresql-{{ pg_version }}"
+    state: present
+
+- name: Install Python packages
+  apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Ensure postgresql is enabled running
+  service:
+    name: postgresql
+    enabled: yes
+    state: started
+
+- name: Change listen_addresses to '*'
+  lineinfile:
+    dest: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+    regexp: "^#listen_addresses"
+    line: "listen_addresses = '*'"
+    state: present
+    backup: yes
+  notify:
+    - restart postgresql
+
+- name: Ensure data directory directory exists
+  file:
+    dest: "{{ pg_data_dir }}"
+    mode: 0700
+    owner: "postgres"
+    state: directory
+
+- name: Change data directory
+  lineinfile:
+    dest: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+    regexp: "^data_directory"
+    line: "data_directory = '{{ pg_data_dir }}'"
+    state: present
+    backup: yes
+  notify:
+    - restart postgresql

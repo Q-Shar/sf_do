@@ -1,0 +1,4 @@
+---
+# vars file for vsftpd
+# pg_version: 12
+# pg_data_dir: "/var/opt/postgresql/data"

@@ -1,0 +1,70 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  pre_tasks:
+    - name: Set fact
+      set_fact:
+        is_centos: "{{ ansible_distribution == 'CentOS' }}"
+        is_ubuntu: "{{ ansible_distribution == 'Ubuntu' }}"
+
+    - name: debug
+      debug:
+        msg:
+          - is_centos={{ is_centos }}
+          - is_ubuntu={{ is_ubuntu }}
+
+    - name: Install python 3 for ansible
+      apt:
+        pkg:
+        - python3
+        - python3-apt
+        state: present
+      when: is_ubuntu
+
+    - name: Install python 3 for ansible
+      yum:
+        name:
+        - python3
+        state: latest
+      when: is_centos
+
+  # vars:
+  #   ansible_python_interpreter: /usr/bin/python3
+
+- hosts: app
+  gather_facts: yes
+  become: yes
+
+  #  A list of tasks to execute before roles.
+  pre_tasks:
+    - name: APP hostname
+      shell: hostname
+
+    - name: debug
+      debug:
+        msg:
+          - is_centos={{ is_centos }}
+          - is_ubuntu={{ is_ubuntu }}
+  roles:
+    - { role: docker, become: yes }
+
+- hosts: database
+  gather_facts: no
+  become: yes
+
+  pre_tasks:
+    - name: DB hostname
+      shell: hostname
+
+  roles:
+  - { role: postgresql, become: yes }
+
+- hosts: web
+  gather_facts: no
+  become: yes
+
+  pre_tasks:
+    - name: WEB hostname
+      shell: hostname

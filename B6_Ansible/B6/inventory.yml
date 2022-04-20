@@ -1,0 +1,19 @@
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  children:
+    app:
+      hosts:
+        vm2:
+        vm3:
+
+    database:
+      hosts:
+        vm1:
+      vars:
+        pg_version: 12
+        pg_data_dir: "/var/opt/postgresql/data"
+
+    web:
+      hosts:
+        vm1:
