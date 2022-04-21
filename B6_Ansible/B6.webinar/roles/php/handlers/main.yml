@@ -1,0 +1,4 @@
+---
+# handlers file for php
+- name: restart postgresql
+  service: name=postgresql state=restarted

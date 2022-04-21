@@ -1,0 +1,26 @@
+all:
+  hosts:
+    ya1:
+      ansible_host: "51.250.108.187"
+    ya2:
+      ansible_host: "51.250.109.229"
+
+  vars:
+    ansible_connection: ssh
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: ansible
+    ansible_ssh_private_key_file: ~/.ssh/id_rsa_ansible_2
+    php_port: 9000
+    php_server: "10.0.0.27" # "127.0.0.1"
+    web_server: "10.0.0.35" # "any"
+
+  children:
+    web:
+      hosts:
+        ya1:
+
+    php:
+      hosts:
+        ya2:
+      vars:
+        php_version: 7.4

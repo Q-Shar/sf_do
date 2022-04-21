@@ -1,0 +1,22 @@
+---
+# tasks file for http
+- name: Install Nginx
+  apt:
+    update_cache: yes
+    pkg:
+      - nginx
+    state: latest
+  register: nginxinstalled # register statement for successfull installing for Nginx
+
+# - debug:
+#     var: nginxinstalled
+
+- name: Start up the Nginx service
+  when: nginxinstalled.stdout.find('is not installed') == -1 # check statement for Nginx from ansible_facts
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Add Nginx cofig
+  template: src={{ domain }}.config dest=/etc/nginx/conf.d/{{ domain }}.conf #owner=nginx group=nginx

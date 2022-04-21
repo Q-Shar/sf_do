@@ -1,0 +1,21 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+
+  roles:
+  - { role: users, become: yes }
+
+- hosts: web
+  gather_facts: no
+  become: yes
+
+  roles:
+  - { role: http, become: yes }
+
+- hosts: php
+  gather_facts: no
+  become: yes
+
+  roles:
+  - { role: php, become: yes }

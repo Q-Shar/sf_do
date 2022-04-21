@@ -1,0 +1,4 @@
+---
+# vars file for php
+php_ver: 7.4
+document_root: /opt/nginx/ansible

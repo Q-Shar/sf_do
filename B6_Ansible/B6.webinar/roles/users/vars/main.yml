@@ -1,0 +1,10 @@
+---
+# vars file for users
+username: user1
+password: 1234 # ""{{ vault_password }}"
+host_ssh: /home/qshar/.ssh/id_rsa_ansible_2
+#cloud_sa_user: admin
+host_alias: ansible
+source_key: /home/qshar/.ssh/id_rsa_ansible_2
+ansible_ssh_private_key_file: "{{ host_ssh }}" # access to remote host
+dest_key: /home/{{username}}/.ssh
