@@ -1,0 +1,33 @@
+---
+- hosts: localhost
+  gather_facts: False
+  tasks:
+  - name: Install packages required to run the examples
+    sudo: true
+    apt:
+      name: "{{item}}"
+      update_cache: yes
+      state: installed
+    with_items:
+         - python3
+         - python-pip
+         - python3-pip
+         - ansible
+         - git
+         - build-essential
+         - python3-dev
+         - libpq-dev
+         - libssl-dev
+         - libffi-dev
+         - libxml2-dev
+         - libxslt1-dev
+
+  - name: install required python dependencies
+    sudo: true
+    pip:
+      requirements: /vagrant/requirements.txt
+      executable: pip3
+
+  # create a symlink in the home directory to the shared directory
+  - name: create 'examples' link
+    file: src=/vagrant dest=/home/vagrant/examples owner=vagrant group=vagrant state=link
